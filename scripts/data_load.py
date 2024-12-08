@@ -10,7 +10,7 @@ import torch.utils.data.dataset
 def get_data(path):
     data_paths = glob.glob(path + "/*.npy")
     datas = []
-    for path in data_paths[:1]:
+    for path in data_paths:
         data = np.load(path, allow_pickle=True)
         datas.append(data.item())
     datas = jax.tree_util.tree_map(lambda *x: jnp.concatenate(x, axis = 0), *datas)

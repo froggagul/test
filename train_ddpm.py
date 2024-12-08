@@ -54,7 +54,7 @@ class MLP(nn.Module):
     """A very simplified U-Net-like model for DDPM."""
     @nn.compact
     def __call__(self, x, t, branch_pcs, mug_pcs):
-        hidden_dim = 32
+        hidden_dim = 256
         def timestep_embedding(t, dim=64):
             half_dim = dim // 2
             freqs = jnp.exp(-jnp.log(10000) * jnp.arange(half_dim) / half_dim)
@@ -193,8 +193,9 @@ if __name__ == "__main__":
         new_params = optax.apply_updates(params, updates)
         return new_params, new_opt_state
 
-    # train_step_jit = jax.jit(train_step)
-    train_step_jit = train_step
+    train_step_jit = jax.jit(train_step)
+    diffusion_loss_jit = jax.jit(diffusion_loss)
+    # train_step_jit = train_step
 
     num_steps = 1000  # Adjust as needed
 
@@ -205,7 +206,7 @@ if __name__ == "__main__":
 
         loss_val = 0
         for batch in val_dataloader:
-            loss_val += diffusion_loss(params, step_rng, batch)
+            loss_val += diffusion_loss_jit(params, step_rng, batch)
         loss_val /= len(val_dataloader)
         print(f"Step {step}, loss: {loss_val.item()}")
 
